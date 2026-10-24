@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="Sistem manajemen produksi, pembagian hasil, anggota, kasbon, kas, dan laporan GRUP 57 MATTUJU.">
+<meta name="application-name" content="GRUP 57 MATTUJU">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>GRUP 57 (MATTUJU)</title>
+<style>
+:root{--bg:#101112;--panel:#1b1d1f;--gold:#e5b94f;--text:#f7f4eb;--muted:#b8b4a8;--line:#383a3c;--green:#85d6a0;--red:#ff9c91}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:22px 16px 18px;background:linear-gradient(135deg,#171717,#292315);border-bottom:1px solid #55451f}
+.brand{color:var(--gold);font-size:23px;font-weight:900;letter-spacing:.5px}.subtitle{font-size:12px;color:var(--muted);margin-top:4px}
+main{max-width:900px;margin:auto;padding:14px 12px 90px}.nav{display:flex;gap:7px;overflow:auto;padding:10px 0 14px;position:sticky;top:0;background:var(--bg);z-index:3}
+.nav button{white-space:nowrap;background:#242628;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.nav button.active{background:var(--gold);color:#171717;font-weight:800}
+.page{display:none}.page.active{display:block}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:12px}
+h2{font-size:18px;margin:0 0 12px}h3{font-size:14px;color:var(--gold);margin:16px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#242628;padding:13px;border-radius:12px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:18px;margin-top:5px;overflow-wrap:anywhere}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 5px}input,select,textarea{width:100%;background:#101112;border:1px solid #4a4b4b;color:var(--text);border-radius:9px;padding:11px;font:inherit}input[type=checkbox]{width:auto;transform:scale(1.2);margin-right:7px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:12px 14px;background:var(--gold);color:#161616;font-weight:800;font:inherit;cursor:pointer}.btn.secondary{background:#303234;color:var(--text);border:1px solid var(--line)}.btn.danger{background:#592923;color:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--gold)}.tablewrap{overflow:auto}.muted{color:var(--muted);font-size:12px}.result{background:#252316;border:1px solid #625127;border-radius:12px;padding:13px;margin-top:12px}.big{font-size:23px;color:var(--gold);font-weight:900}.checklist{display:grid;grid-template-columns:1fr 1fr;gap:8px}.person{background:#252729;padding:9px;border-radius:9px}.person label{margin:0;color:var(--text);font-size:14px}.notice{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;background:#2d2b20;color:var(--gold);padding:4px 8px;border-radius:99px;font-size:11px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.checklist{grid-template-columns:repeat(3,1fr)}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<header><div style="display:flex;align-items:center;gap:12px"><img src="./logo.png" alt="Logo GRUP 57 MATTUJU" width="58" height="58" style="border-radius:12px;object-fit:cover;border:1px solid #e5b94f"><div><div class="brand">GRUP 57 (MATTUJU)</div><div class="subtitle">Sistem Manajemen Produksi &amp; Keuangan Tambang</div></div></div><div class="actions" style="margin-top:12px"><button class="btn secondary" id="installAppBtn" hidden>Pasang aplikasi</button><span class="pill" id="connectionStatus">Memeriksa koneksi…</span></div></header>
+<main>
+<div class="nav" id="nav">
+<button class="active" data-page="dashboard">Dashboard</button><button data-page="produksi">Produksi &amp; Gaji</button><button data-page="anggota">Anggota</button><button data-page="harga">Harga &amp; Barang</button><button data-page="kasbon">Kasbon</button><button data-page="kasbos">Kas Bos</button><button data-page="kasanggota">Kas Anggota</button><button data-page="slipgaji">Slip Gaji</button><button data-page="riwayat">Riwayat</button><button data-page="laporan">Laporan Harian/Bulanan</button><button data-page="backup">Backup &amp; Pulihkan</button>
+</div>
+<section class="page active" id="dashboard">
+<div class="card"><h2>Ringkasan</h2><div class="grid">
+<div class="metric"><span>Total produksi tersimpan</span><strong id="dGram">0 gram</strong></div><div class="metric"><span>Total nilai produksi</span><strong id="dNilai">Rp0</strong></div><div class="metric"><span>Total perongkosan</span><strong id="dBiaya">Rp0</strong></div><div class="metric"><span>Catatan produksi</span><strong id="dHari">0</strong></div>
+</div></div>
+<div class="card"><h2>Mulai cepat</h2><p class="notice">Masukkan produksi harian, pilih anggota yang bekerja, catat biaya yang benar-benar terjadi, lalu hitung pembagian. Harga yang tersimpan menjadi harga standar; setiap transaksi menyimpan salinan harga saat itu agar laporan lama tidak berubah.</p><button class="btn" onclick="showPage('produksi')">＋ Catat produksi hari ini</button></div>
+<div class="card"><h2>Catatan penting</h2><p class="notice">Versi awal ini menyimpan data di browser/perangkat yang digunakan. Sinkronisasi ketua dan bendahara dari HP berbeda belum aktif; diperlukan konfigurasi database online dan akun pengguna sebelum dipakai bersama.</p></div>
+</section>
+<section class="page" id="anggota">
+<div class="card"><h2>Daftar anggota</h2><p class="notice">Nama anggota bisa diubah menjadi nama asli. Jika nama diubah, catatan kasbon dan riwayat pembagian anggota tersebut juga mengikuti nama baru agar tidak membingungkan.</p><div class="row"><div><label>Nama lengkap anggota</label><input id="newMember" placeholder="Contoh: Andi Saputra"></div><div><label>Nomor HP (opsional)</label><input id="newPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div></div><label>Jabatan/tugas</label><select id="newRole"><option>Anggota biasa</option><option>Ketua</option><option>Bendahara</option><option>Operator mesin</option><option>Kepala lapangan</option><option>Juru masak</option><option>Tugas lainnya</option></select><div class="actions"><button class="btn" onclick="addMember()">Tambah anggota</button></div><div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Nama &amp; kontak</th><th>Tugas</th><th>Total kasbon</th><th>Sudah dibayar</th><th>Sisa kasbon</th><th>Aksi</th></tr></thead><tbody id="memberRows"></tbody></table></div></div>
+</section>
+<section class="page" id="harga">
+<div class="card"><h2>Pengaturan harga standar</h2><p class="notice">Harga di bawah bisa diubah kapan saja. Perubahan tidak mengubah transaksi yang sudah disimpan.</p><div id="priceFields"></div><div class="actions"><button class="btn" onclick="savePrices()">Simpan harga standar</button></div></div>
+<div class="card"><h2>Tambah barang/biaya</h2><div class="row"><div><label>Nama barang</label><input id="newItem" placeholder="Contoh: Oli mesin"></div><div><label>Satuan</label><input id="newUnit" placeholder="Liter, jerigen, pak"></div></div><label>Harga standar (Rp)</label><input id="newPrice" type="number" min="0" value="0"><div class="actions"><button class="btn secondary" onclick="addItem()">Tambah barang</button></div></div>
+</section>
+<section class="page" id="produksi">
+<div class="card"><h2>Catat produksi &amp; pembagian hasil</h2>
+<div class="row"><div><label>Tanggal</label><input id="date" type="date"></div><div><label>Harga emas per gram (Rp)</label><input id="goldPrice" type="number" min="0" step="1"></div></div>
+<div class="row"><div><label>Produksi utama (gram)</label><input id="grams" type="number" min="0" step="0.001" placeholder="8.67"></div><div><label>Bonus spiral (gram)</label><input id="spiral" type="number" min="0" step="0.001" value="0"></div></div>
+<h3>Anggota yang bekerja hari ini</h3><div id="workMembers" class="checklist"></div>
+<h3>Anggota yang menerima bonus spiral</h3><div id="spiralMembers" class="checklist"></div>
+<h3>Perongkosan hari ini</h3><p class="notice">Masukkan jumlah dan harga transaksi. Centang “Potong dari hasil” hanya jika biaya itu memang mengurangi dasar pembagian bos/anggota.</p>
+<div id="expenseInputs"></div><div class="actions"><button class="btn secondary" onclick="addExpenseRow()">＋ Tambah baris biaya</button></div>
+<div class="actions"><button class="btn" onclick="calculate()">Hitung pembagian</button><button class="btn secondary" onclick="clearForm()">Kosongkan formulir</button></div>
+<div id="calcResult"></div>
+</div>
+</section>
+<section class="page" id="kasbon">
+<div class="card"><h2>Catat kasbon anggota</h2><label>Anggota</label><select id="loanMember"></select><div class="row"><div><label>Tanggal</label><input id="loanDate" type="date"></div><div><label>Nominal kasbon (Rp)</label><input id="loanAmount" type="number" min="1"></div></div><label>Keterangan</label><input id="loanNote" placeholder="Contoh: kasbon belanja keluarga"><div class="actions"><button class="btn" onclick="addLoan()">Simpan kasbon</button></div></div>
+<div class="card"><h2>Riwayat kasbon</h2><div id="loanRows"></div></div>
+</section>
+<section class="page" id="kasbos"><div class="card"><h2>Buku kas bos</h2><p class="notice">Catat pemasukan dan pengeluaran kas bos secara terpisah. Catatan ini tidak mengubah pembagian produksi yang sudah tersimpan.</p><div class="row"><div><label>Tanggal transaksi</label><input id="bossCashDate" type="date"></div><div><label>Jenis transaksi</label><select id="bossCashType"><option value="in">Pemasukan</option><option value="out">Pengeluaran</option></select></div></div><label>Keterangan</label><input id="bossCashNote" placeholder="Contoh: setoran hasil produksi / beli suku cadang"><label>Nominal (Rp)</label><input id="bossCashAmount" type="number" min="1" inputmode="numeric"><div class="actions"><button class="btn" onclick="addBossCash()">Simpan transaksi kas bos</button></div></div><div class="card"><h2>Saldo kas bos</h2><div class="grid"><div class="metric"><span>Total pemasukan</span><strong id="bossCashIn">Rp0</strong></div><div class="metric"><span>Total pengeluaran</span><strong id="bossCashOut">Rp0</strong></div><div class="metric"><span>Saldo kas</span><strong id="bossCashBalance">Rp0</strong></div></div><div id="bossCashRows"></div></div></section>
+<section class="page" id="kasanggota"><div class="card"><h2>Buku kas anggota</h2><p class="notice">Catat simpanan atau penarikan uang masing-masing anggota. Saldo dihitung dari semua transaksi tersimpan.</p><div class="row"><div><label>Tanggal</label><input id="memberCashDate" type="date"></div><div><label>Anggota</label><select id="memberCashName"></select></div></div><div class="row"><div><label>Jenis transaksi</label><select id="memberCashType"><option value="in">Simpanan / setoran</option><option value="out">Penarikan</option></select></div><div><label>Nominal (Rp)</label><input id="memberCashAmount" type="number" min="1" inputmode="numeric"></div></div><label>Keterangan</label><input id="memberCashNote" placeholder="Contoh: simpanan mingguan"><div class="actions"><button class="btn" onclick="addMemberCash()">Simpan transaksi anggota</button></div></div><div class="card"><h2>Saldo kas per anggota</h2><div id="memberCashSummary"></div></div><div class="card"><h2>Riwayat kas anggota</h2><div id="memberCashRows"></div></div></section>
+<section class="page" id="slipgaji"><div class="card"><h2>Slip gaji anggota</h2><p class="notice">Pilih tanggal produksi dan anggota untuk melihat rincian gaji utama, bonus spiral, serta sisa kasbon. Kasbon ditampilkan sebagai informasi terpisah dan tidak otomatis dipotong dari gaji.</p><div class="row"><div><label>Tanggal produksi</label><select id="slipDate" onchange="renderPayslip()"></select></div><div><label>Anggota</label><select id="slipMember" onchange="renderPayslip()"></select></div></div><div id="payslipResult" style="margin-top:12px"></div><div class="actions"><button class="btn" onclick="printPayslip()">Cetak / Simpan PDF</button></div></div></section>
+<section class="page" id="riwayat"><div class="card"><h2>Riwayat produksi &amp; pembagian</h2><div class="actions"><button class="btn secondary" onclick="exportCSV()">Ekspor CSV</button><button class="btn danger" onclick="clearHistory()">Hapus semua riwayat</button></div><div id="historyRows" style="margin-top:12px"></div></div></section>
+
+<section class="page" id="laporan">
+<div class="card"><h2>Laporan harian &amp; bulanan</h2><p class="notice">Laporan dirangkum dari catatan produksi yang sudah disimpan. Pilih periode untuk melihat total produksi, nilai kotor, biaya, bagian bos, bagian anggota, dan bonus spiral.</p>
+<div class="row"><div><label>Periode laporan</label><select id="reportMode" onchange="renderReport()"><option value="day">Harian</option><option value="month" selected>Bulanan</option></select></div><div><label>Tanggal acuan</label><input type="date" id="reportDate" onchange="renderReport()"></div></div>
+<div class="actions"><button class="btn" onclick="renderReport()">Tampilkan laporan</button><button class="btn secondary" onclick="exportReportCSV()">Ekspor laporan CSV</button><button class="btn secondary" onclick="printReport()">Cetak / Simpan PDF</button></div><div id="reportResult" style="margin-top:14px"></div></div>
+<div class="card"><h2>Catatan pembacaan laporan</h2><p class="notice">Laporan hanya menghitung produksi yang telah disimpan. Kas bos dan kas anggota tetap ditampilkan di menu masing-masing dan tidak otomatis digabung dengan nilai produksi, untuk menghindari penghitungan ganda.</p></div>
+</section>
+
+<section class="page" id="backup"><div class="card"><h2>Backup &amp; pemulihan data</h2><p class="notice"><b>Backup:</b> simpan salinan seluruh data aplikasi sebagai file JSON di HP. Lakukan rutin dan simpan file di tempat aman.</p><div class="actions"><button class="btn" onclick="backupData()">Unduh backup data</button></div><hr><p class="notice"><b>Pemulihan:</b> pilih file backup GRUP 57 MATTUJU yang pernah disimpan. Data yang sekarang akan diganti dengan isi backup setelah kamu mengonfirmasi.</p><label>Pilih file backup (.json)</label><input id="restoreFile" type="file" accept=".json,application/json" onchange="restoreBackup(event)"><p id="backupStatus" class="notice" aria-live="polite">Data masih tersimpan di browser HP ini. Jangan hapus data browser sebelum membuat backup.</p></div><div class="card"><h2>Catatan keamanan</h2><p class="notice">File backup berisi data produksi, anggota, dan keuangan. Jangan bagikan kepada orang yang tidak berwenang. Pemulihan hanya berlaku pada browser/perangkat tempat file dipilih.</p></div></section>
+</main>
+<script>
+const KEY='grup57_mattuju_v1';
+const defaultState={
+ members:['Anggota 1','Anggota 2','Anggota 3','Anggota 4','Anggota 5','Anggota 6','Anggota 7','Anggota 8'],
+ prices:[
+ {name:'Emas',unit:'gram',price:2000000,gold:true},
+ {name:'Solar',unit:'jerigen',price:550000},
+ {name:'Raksa',unit:'satuan',price:80000},
+ {name:'Sabun',unit:'satuan',price:20000},
+ {name:'Mi instan',unit:'pak',price:80000},
+ {name:'Ikan',unit:'kg',price:35000},
+ {name:'Gula',unit:'kg',price:20000},
+ {name:'Minyak goreng',unit:'liter',price:25000},
+ {name:'Nasi bungkus',unit:'bungkus',price:20000},
+ {name:'Oli mesin',unit:'liter',price:0},
+ {name:'Lain-lain',unit:'satuan',price:0}
+ ], history:[], loans:[]
+};
+let state;
+try{state=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaultState)}catch(e){state=JSON.parse(JSON.stringify(defaultState))}
+state.memberProfiles ||= {};
+state.bossCash ||= []; state.memberCash ||= [];
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));renderAll()}
+function money(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Math.round(n||0))}
+function num(v){return Math.max(0,Number(v)||0)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===p));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));if(p==='produksi')renderProductionInputs();if(p==='kasbon')renderLoans();if(p==='kasbos')renderBossCash();if(p==='kasanggota')renderMemberCash();if(p==='slipgaji')renderPayslip();if(p==='laporan')renderReport();window.scrollTo(0,0)}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+function profileOf(name){return state.memberProfiles[name]||(state.memberProfiles[name]={phone:'',role:'Anggota biasa'});}
+function memberLoanTotals(name){let loans=state.loans.filter(l=>l.member===name);return {total:loans.reduce((s,l)=>s+num(l.amount),0),paid:loans.reduce((s,l)=>s+num(l.paid),0),left:loans.reduce((s,l)=>s+Math.max(0,num(l.amount)-num(l.paid)),0)}}
+function addMember(){let n=document.getElementById('newMember').value.trim(),phone=document.getElementById('newPhone').value.trim(),role=document.getElementById('newRole').value;if(!n)return alert('Masukkan nama lengkap anggota.');if(state.members.some(m=>m.toLowerCase()===n.toLowerCase()))return alert('Nama anggota sudah ada.');state.members.push(n);state.memberProfiles[n]={phone,role};document.getElementById('newMember').value='';document.getElementById('newPhone').value='';document.getElementById('newRole').value='Anggota biasa';persist()}
+function renameMember(i){let oldName=state.members[i];let newName=prompt('Masukkan nama lengkap/asli anggota:',oldName);if(newName===null)return;newName=newName.trim();if(!newName)return alert('Nama anggota tidak boleh kosong.');if(state.members.some((m,j)=>j!==i&&m.toLowerCase()===newName.toLowerCase()))return alert('Nama anggota tersebut sudah ada.');let prof=profileOf(oldName);let phone=prompt('Nomor HP anggota (boleh dikosongkan):',prof.phone||'');if(phone===null)phone=prof.phone;let roles=['Anggota biasa','Ketua','Bendahara','Operator mesin','Kepala lapangan','Juru masak','Tugas lainnya'];let roleText=prompt('Jabatan/tugas anggota. Pilihan: '+roles.join(', '),prof.role||'Anggota biasa');if(roleText===null)roleText=prof.role;state.members[i]=newName;delete state.memberProfiles[oldName];state.memberProfiles[newName]={phone:phone.trim(),role:roleText.trim()||'Anggota biasa'};state.loans.forEach(l=>{if(l.member===oldName)l.member=newName});(state.memberCash||[]).forEach(t=>{if(t.member===oldName)t.member=newName});state.history.forEach(h=>{h.workers=h.workers.map(m=>m===oldName?newName:m);h.spiralPeople=h.spiralPeople.map(m=>m===oldName?newName:m)});persist();alert('Data anggota diperbarui. Catatan kasbon dan riwayat pembagian tetap terhubung ke nama baru.')}
+function editMemberProfile(i){let name=state.members[i],p=profileOf(name);let phone=prompt('Nomor HP '+name+':',p.phone||'');if(phone===null)return;let role=prompt('Jabatan/tugas '+name+':',p.role||'Anggota biasa');if(role===null)return;p.phone=phone.trim();p.role=role.trim()||'Anggota biasa';persist()}
+function removeMember(i){let name=state.members[i];if(state.loans.some(l=>l.member===name&&l.amount>l.paid))return alert('Anggota masih memiliki sisa kasbon. Lunasi atau selesaikan kasbon terlebih dahulu agar catatan utang tidak hilang.');if(!confirm('Hapus anggota ini dari daftar? Riwayat produksi dan kasbon lama tetap tersimpan.'))return;state.members.splice(i,1);persist()}
+function renderMembers(){document.getElementById('memberRows').innerHTML=state.members.map((m,i)=>{let p=profileOf(m),t=memberLoanTotals(m);return `<tr><td><strong>${esc(m)}</strong><br><span class="muted">${esc(p.phone||'Nomor HP belum diisi')}</span></td><td>${esc(p.role||'Anggota biasa')}</td><td>${money(t.total)}</td><td>${money(t.paid)}</td><td><strong>${money(t.left)}</strong></td><td><div class="actions" style="margin:0"><button class="btn secondary" onclick="renameMember(${i})">Ubah data</button><button class="btn secondary" onclick="editMemberProfile(${i})">Kontak/tugas</button><button class="btn danger" onclick="removeMember(${i})">Hapus</button></div></td></tr>`}).join('');document.getElementById('loanMember').innerHTML=state.members.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('')}
+function renderPrices(){document.getElementById('priceFields').innerHTML=state.prices.map((p,i)=>`<div class="row" style="margin-bottom:8px"><div><label>${esc(p.name)} (${esc(p.unit)})</label><input id="pn${i}" value="${esc(p.name)}" aria-label="Nama"></div><div><label>Harga standar (Rp)</label><input id="pp${i}" type="number" min="0" value="${p.price}"></div></div>`).join('')}
+function savePrices(){state.prices.forEach((p,i)=>{p.name=document.getElementById('pn'+i).value.trim()||p.name;p.price=num(document.getElementById('pp'+i).value)});persist();alert('Harga standar tersimpan. Transaksi lama tidak berubah.')}
+function addItem(){let name=document.getElementById('newItem').value.trim(),unit=document.getElementById('newUnit').value.trim()||'satuan',price=num(document.getElementById('newPrice').value);if(!name)return alert('Masukkan nama barang.');state.prices.push({name,unit,price});document.getElementById('newItem').value='';document.getElementById('newUnit').value='';document.getElementById('newPrice').value=0;persist()}
+function renderProductionInputs(){
+ let date=new Date();document.getElementById('date').value ||= `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+ document.getElementById('goldPrice').value=state.prices.find(p=>p.gold)?.price||2000000;
+ const make=(id,checks)=>document.getElementById(id).innerHTML=state.members.map((m,i)=>`<div class="person"><label><input type="checkbox" value="${esc(m)}" ${checks?'checked':''}>${esc(m)}</label></div>`).join('');
+ make('workMembers',true);make('spiralMembers',true);
+ document.getElementById('expenseInputs').innerHTML='';addExpenseRow();
+}
+function addExpenseRow(){let box=document.getElementById('expenseInputs');let idx=box.children.length;let options=state.prices.filter(p=>!p.gold).map(p=>`<option value="${esc(p.name)}" data-price="${p.price}" data-unit="${esc(p.unit)}">${esc(p.name)}</option>`).join('');
+ let div=document.createElement('div');div.className='card';div.style.padding='10px';div.innerHTML=`<div class="row"><div><label>Barang/biaya</label><select class="ex-name" onchange="expenseChanged(this)">${options}<option value="__custom">Lainnya (manual)</option></select></div><div><label>Jumlah</label><input class="ex-qty" type="number" min="0" step="0.01" value="0" oninput="expenseTotal(this)"></div></div><div class="row"><div><label>Harga transaksi (Rp)</label><input class="ex-price" type="number" min="0" value="0" oninput="expenseTotal(this)"></div><div><label>Total (Rp)</label><input class="ex-total" type="number" readonly value="0"></div></div><label><input class="ex-deduct" type="checkbox" checked>Potong dari hasil pembagian</label><div class="actions"><button class="btn danger" onclick="this.closest('.card').remove()">Hapus baris</button></div>`;
+ box.appendChild(div);let sel=div.querySelector('.ex-name');expenseChanged(sel)}
+function expenseChanged(sel){let opt=sel.selectedOptions[0],row=sel.closest('.card');row.querySelector('.ex-price').value=opt.dataset.price||0;row.querySelector('.ex-qty').value=0;expenseTotal(row.querySelector('.ex-qty'))}
+function expenseTotal(el){let row=el.closest('.card');row.querySelector('.ex-total').value=(num(row.querySelector('.ex-qty').value)*num(row.querySelector('.ex-price').value)).toFixed(0)}
+function checked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value)}
+function calculate(){
+ let date=document.getElementById('date').value,grams=num(document.getElementById('grams').value),goldPrice=num(document.getElementById('goldPrice').value),spiral=num(document.getElementById('spiral').value),workers=checked('workMembers'),spiralPeople=checked('spiralMembers');
+ if(!date)return alert('Pilih tanggal produksi.');if(grams<=0)return alert('Masukkan hasil produksi utama.');if(goldPrice<=0)return alert('Harga emas harus lebih dari nol.');if(!workers.length)return alert('Pilih minimal satu anggota yang bekerja.');
+ const expenses=[...document.querySelectorAll('#expenseInputs>.card')].map(r=>({name:r.querySelector('.ex-name').value==='__custom'?'Biaya manual':r.querySelector('.ex-name').value,qty:num(r.querySelector('.ex-qty').value),unitPrice:num(r.querySelector('.ex-price').value),total:num(r.querySelector('.ex-total').value),deduct:r.querySelector('.ex-deduct').checked})).filter(e=>e.total>0);
+ let gross=grams*goldPrice,expenseDeduct=expenses.filter(e=>e.deduct).reduce((s,e)=>s+e.total,0),expenseAll=expenses.reduce((s,e)=>s+e.total,0),net=gross-expenseDeduct;
+ if(net<0)return alert('Biaya yang dipotong melebihi nilai produksi. Periksa kembali.');
+ let boss=net/2,memberPool=net/2,per=memberPool/workers.length,spiralValue=spiral*goldPrice,spiralPer=spiralPeople.length?spiralValue/spiralPeople.length:0;
+ let record={id:Date.now(),date,grams,goldPrice,spiral,workers,spiralPeople,expenses,gross,expenseDeduct,expenseAll,net,boss,memberPool,per,spiralValue,spiralPer};
+ window.pendingRecord=record;
+ document.getElementById('calcResult').innerHTML=`<div class="result"><span class="pill">HASIL PERHITUNGAN</span><div class="grid" style="margin-top:12px"><div class="metric"><span>Total kotor</span><strong>${money(gross)}</strong></div><div class="metric"><span>Biaya total</span><strong>${money(expenseAll)}</strong></div><div class="metric"><span>Biaya yang dipotong</span><strong>${money(expenseDeduct)}</strong></div><div class="metric"><span>Hasil pembagian</span><strong>${money(net)}</strong></div><div class="metric"><span>Bagian bos (50%)</span><strong>${money(boss)}</strong></div><div class="metric"><span>Bagian anggota (50%)</span><strong>${money(memberPool)}</strong></div><div class="metric"><span>Anggota bekerja</span><strong>${workers.length} orang</strong></div><div class="metric"><span>Gaji utama/orang</span><strong>${money(per)}</strong></div><div class="metric"><span>Nilai bonus spiral</span><strong>${money(spiralValue)}</strong></div><div class="metric"><span>Penerima spiral</span><strong>${spiralPeople.length} orang</strong></div><div class="metric"><span>Bonus spiral/orang</span><strong>${money(spiralPer)}</strong></div></div><h3>Rincian anggota</h3><div class="tablewrap"><table><thead><tr><th>Anggota</th><th>Gaji utama</th><th>Bonus spiral</th><th>Total sebelum kasbon</th></tr></thead><tbody>${workers.map(m=>`<tr><td>${esc(m)}</td><td>${money(per)}</td><td>${spiralPeople.includes(m)?money(spiralPer):money(0)}</td><td>${money(per+(spiralPeople.includes(m)?spiralPer:0))}</td></tr>`).join('')}</tbody></table></div><p class="notice">Biaya yang tidak dicentang sebagai potongan tetap masuk laporan pengeluaran, tetapi tidak mengurangi dasar pembagian. Bonus spiral adalah bonus terpisah sesuai aturan grup.</p><div class="actions"><button class="btn" onclick="saveProduction()">Simpan catatan ini</button></div></div>`;
+}
+function saveProduction(){if(!window.pendingRecord)return;state.history.unshift(window.pendingRecord);state.prices.find(p=>p.gold).price=window.pendingRecord.goldPrice;window.pendingRecord=null;persist();document.getElementById('calcResult').innerHTML='<div class="result">Catatan produksi berhasil disimpan.</div>';showPage('riwayat')}
+function clearForm(){if(!confirm('Kosongkan isian formulir?'))return;document.getElementById('grams').value='';document.getElementById('spiral').value=0;document.getElementById('calcResult').innerHTML='';renderProductionInputs()}
+function addLoan(){let member=document.getElementById('loanMember').value,amount=num(document.getElementById('loanAmount').value),date=document.getElementById('loanDate').value,note=document.getElementById('loanNote').value.trim();if(!member||amount<=0)return alert('Pilih anggota dan masukkan nominal kasbon.');state.loans.unshift({id:Date.now(),member,amount,date,note,paid:0});document.getElementById('loanAmount').value='';document.getElementById('loanNote').value='';persist();alert('Kasbon tersimpan.')}
+function repayLoan(id){let l=state.loans.find(x=>x.id===id);if(!l)return;let left=l.amount-l.paid,amt=Number(prompt('Masukkan jumlah pembayaran kasbon. Sisa: '+money(left),left));if(!Number.isFinite(amt)||amt<=0||amt>left)return alert('Nominal tidak valid.');l.paid+=amt;persist()}
+function renderLoans(){let summary=state.members.map(m=>{let t=memberLoanTotals(m);return `<tr><td>${esc(m)}</td><td>${money(t.total)}</td><td>${money(t.paid)}</td><td><strong>${money(t.left)}</strong></td></tr>`}).join('');let details=state.loans.length?`<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Anggota</th><th>Kasbon</th><th>Sudah dibayar</th><th>Sisa</th><th>Aksi</th></tr></thead><tbody>${state.loans.map(l=>`<tr><td>${esc(l.date||'-')}</td><td>${esc(l.member)}<br><span class="muted">${esc(l.note||'')}</span></td><td>${money(l.amount)}</td><td>${money(l.paid)}</td><td>${money(Math.max(0,l.amount-l.paid))}</td><td>${l.paid<l.amount?`<button class="btn secondary" onclick="repayLoan(${l.id})">Bayar</button>`:'Lunas'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Belum ada catatan kasbon.</p>';document.getElementById('loanRows').innerHTML=`<h3>Ringkasan kasbon per anggota</h3><div class="tablewrap"><table><thead><tr><th>Anggota</th><th>Total kasbon</th><th>Sudah dibayar</th><th>Sisa</th></tr></thead><tbody>${summary}</tbody></table></div><h3>Rincian transaksi kasbon</h3>${details}`}
+function renderHistory(){let box=document.getElementById('historyRows');if(!state.history.length){box.innerHTML='<p class="muted">Belum ada catatan produksi.</p>';return}box.innerHTML=state.history.map(h=>`<div class="card" id="history-card-${h.id}"><div class="row"><div><strong>${esc(h.date)}</strong><div class="muted">${h.grams} gram × ${money(h.goldPrice)}</div></div><div style="text-align:right"><span class="pill">${h.workers.length} anggota</span><div class="big">${money(h.per)}/orang</div></div></div><div class="tablewrap"><table><tbody><tr><td>Total kotor</td><td>${money(h.gross)}</td></tr><tr><td>Perongkosan total / dipotong</td><td>${money(h.expenseAll)} / ${money(h.expenseDeduct)}</td></tr><tr><td>Bagian bos</td><td>${money(h.boss)}</td></tr><tr><td>Bagian anggota</td><td>${money(h.memberPool)} ÷ ${h.workers.length} orang = <strong>${money(h.per)}/orang</strong></td></tr><tr><td>Bonus spiral</td><td>${h.spiral} gram = ${money(h.spiralValue)}; ${h.spiralPeople.length} penerima</td></tr></tbody></table></div><details><summary>Rincian biaya &amp; anggota</summary><p class="notice">Bekerja: ${h.workers.map(esc).join(', ')||'-'}<br>Penerima spiral: ${h.spiralPeople.map(esc).join(', ')||'Tidak ada'}</p>${h.expenses.map(e=>`<div class="muted">${esc(e.name)}: ${money(e.total)} — ${e.deduct?'dipotong':'tidak dipotong'}</div>`).join('')}</details><div class="actions"><button class="btn secondary" onclick="downloadHistoryImage(${h.id})">⬇ Download gambar</button><button class="btn secondary" onclick="editHistory(${h.id})">Revisi catatan</button><button class="btn danger" onclick="deleteHistory(${h.id})">Hapus catatan</button></div></div>`).join('')}
+async function downloadHistoryImage(id){
+ const card=document.getElementById('history-card-'+id);
+ if(!card)return alert('Catatan tidak ditemukan.');
+ if(typeof html2canvas!=='function')return alert('Fitur gambar belum siap. Pastikan internet aktif, lalu coba lagi.');
+ const buttons=card.querySelector('.actions');
+ try{
+  const canvas=await html2canvas(card,{
+   backgroundColor:'#1b1d1f',
+   onclone:(doc)=>{const el=doc.getElementById('history-card-'+id);if(el){const a=el.querySelector('.actions');if(a)a.style.display='none';const d=el.querySelector('details');if(d)d.open=true;}},
+   scale:2,
+   useCORS:true,
+   logging:false,
+   windowWidth:Math.max(document.documentElement.clientWidth,card.scrollWidth)
+  });
+  const link=document.createElement('a');
+  const date=(state.history.find(x=>x.id===id)||{}).date||'catatan';
+  link.download='GRUP_57_MATTUJU_Riwayat_'+date+'.png';
+  link.href=canvas.toDataURL('image/png');
+  document.body.appendChild(link);link.click();link.remove();
+ }catch(err){
+  alert('Gagal membuat gambar. Pastikan internet aktif, lalu coba lagi.');
+  console.error(err);
+ }
+}
+function editHistory(id){
+ let h=state.history.find(x=>x.id===id);if(!h)return;
+ if(!confirm('Buka revisi catatan produksi tanggal '+h.date+'? Nilai hasil pembagian akan dihitung ulang.'))return;
+ let date=prompt('Tanggal produksi (YYYY-MM-DD):',h.date);if(date===null)return;date=date.trim();
+ let grams=Number(prompt('Produksi emas (gram):',h.grams));if(!Number.isFinite(grams)||grams<=0)return alert('Produksi tidak valid. Revisi dibatalkan.');
+ let goldPrice=Number(prompt('Harga emas per gram (Rp):',h.goldPrice));if(!Number.isFinite(goldPrice)||goldPrice<=0)return alert('Harga emas tidak valid. Revisi dibatalkan.');
+ let spiral=Number(prompt('Bonus spiral (gram):',h.spiral));if(!Number.isFinite(spiral)||spiral<0)return alert('Bonus spiral tidak valid. Revisi dibatalkan.');
+ let workerText=prompt('Nama anggota yang bekerja, pisahkan dengan koma. Nama harus sesuai daftar anggota:\n'+state.members.join(', '),h.workers.join(', '));if(workerText===null)return;
+ let workers=workerText.split(',').map(x=>x.trim()).filter(Boolean);workers=[...new Set(workers)];if(!workers.length||workers.some(m=>!state.members.includes(m)))return alert('Daftar anggota tidak valid. Pastikan nama sesuai daftar anggota. Revisi dibatalkan.');
+ let spiralText=prompt('Nama penerima bonus spiral, pisahkan dengan koma. Kosongkan jika tidak ada:',h.spiralPeople.join(', '));if(spiralText===null)return;
+ let spiralPeople=[...new Set(spiralText.split(',').map(x=>x.trim()).filter(Boolean))];if(spiralPeople.some(m=>!workers.includes(m)))return alert('Penerima spiral harus termasuk anggota yang bekerja. Revisi dibatalkan.');
+ let expenses=h.expenses.map((e,i)=>{let total=Number(prompt('Biaya '+e.name+' (Rp), isi 0 jika tidak ada:',e.total));if(!Number.isFinite(total)||total<0)throw new Error('Nominal biaya tidak valid.');return {...e,total,qty:e.qty||1,unitPrice:e.unitPrice||total}});
+ let gross=grams*goldPrice,expenseAll=expenses.reduce((a,e)=>a+e.total,0),expenseDeduct=expenses.filter(e=>e.deduct).reduce((a,e)=>a+e.total,0),net=gross-expenseDeduct;
+ if(net<0)return alert('Biaya yang dipotong melebihi nilai produksi. Revisi dibatalkan.');
+ h.date=date;h.grams=grams;h.goldPrice=goldPrice;h.spiral=spiral;h.workers=workers;h.spiralPeople=spiralPeople;h.expenses=expenses;h.gross=gross;h.expenseAll=expenseAll;h.expenseDeduct=expenseDeduct;h.net=net;h.boss=net/2;h.memberPool=net/2;h.per=h.memberPool/workers.length;h.spiralValue=spiral*goldPrice;h.spiralPer=spiralPeople.length?h.spiralValue/spiralPeople.length:0;
+ persist();alert('Catatan berhasil direvisi dan seluruh pembagian dihitung ulang.');
+}function deleteHistory(id){if(confirm('Hapus catatan ini?')){state.history=state.history.filter(h=>h.id!==id);persist()}}
+function clearHistory(){if(confirm('Yakin menghapus seluruh riwayat produksi? Tindakan ini tidak dapat dibatalkan.')){state.history=[];persist()}}
+function exportCSV(){let rows=[['Tanggal','Produksi gram','Harga emas','Total kotor','Perongkosan total','Perongkosan dipotong','Hasil bersih','Bagian bos','Bagian anggota','Jumlah anggota','Gaji per anggota','Spiral gram','Nilai spiral','Penerima spiral']];state.history.forEach(h=>rows.push([h.date,h.grams,h.goldPrice,h.gross,h.expenseAll,h.expenseDeduct,h.net,h.boss,h.memberPool,h.workers.length,h.per,h.spiral,h.spiralValue,h.spiralPeople.join('; ')]));let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));a.download='laporan-grup57-mattuju.csv';a.click();URL.revokeObjectURL(a.href)}
+
+function backupData(){
+ try{
+  const payload={app:'GRUP 57 MATTUJU',formatVersion:1,createdAt:new Date().toISOString(),data:state};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='GRUP57-MATTUJU-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const el=document.getElementById('backupStatus');if(el)el.textContent='Backup dibuat. Periksa folder Download atau lokasi penyimpanan HP.';
+ }catch(e){alert('Backup gagal dibuat. Coba lagi dan periksa ruang penyimpanan HP.')}
+}
+function restoreBackup(event){
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=function(){
+  try{
+   const payload=JSON.parse(String(reader.result||''));
+   if(payload&&payload.app&&payload.app!=='GRUP 57 MATTUJU')throw new Error('Aplikasi tidak cocok');
+   const imported=payload&&payload.data?payload.data:payload;
+   if(!imported||!Array.isArray(imported.members)||!Array.isArray(imported.prices)||!Array.isArray(imported.history)||!Array.isArray(imported.loans))throw new Error('Format tidak cocok');
+   if(!confirm('PERINGATAN: Pemulihan akan mengganti seluruh data aplikasi saat ini dengan isi file backup. Pastikan kamu sudah menyimpan backup data saat ini. Lanjutkan?')){event.target.value='';return}
+   state=imported;state.memberProfiles ||= {};persist();
+   const el=document.getElementById('backupStatus');if(el)el.textContent='Pemulihan berhasil. Data dari file backup sudah dimuat.';
+   alert('Pemulihan data berhasil.');showPage('dashboard');
+  }catch(e){alert('File backup tidak valid atau bukan file backup GRUP 57 MATTUJU. Data saat ini tidak diubah.')}
+  event.target.value='';
+ };
+ reader.onerror=function(){alert('File tidak dapat dibaca. Coba pilih file backup lain.');event.target.value=''};
+ reader.readAsText(file);
+}
+
+function todayLocal(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function addBossCash(){const date=document.getElementById('bossCashDate').value,type=document.getElementById('bossCashType').value,amount=num(document.getElementById('bossCashAmount').value),note=document.getElementById('bossCashNote').value.trim();if(!date||amount<=0||!note)return alert('Isi tanggal, keterangan, dan nominal yang benar.');state.bossCash.unshift({id:Date.now(),date,type,amount,note});document.getElementById('bossCashAmount').value='';document.getElementById('bossCashNote').value='';persist();alert('Transaksi kas bos tersimpan.')}
+function deleteBossCash(id){if(confirm('Hapus transaksi kas bos ini?')){state.bossCash=state.bossCash.filter(x=>x.id!==id);persist()}}
+function renderBossCash(){state.bossCash ||= [];const ins=state.bossCash.filter(x=>x.type==='in').reduce((a,x)=>a+num(x.amount),0),outs=state.bossCash.filter(x=>x.type==='out').reduce((a,x)=>a+num(x.amount),0);document.getElementById('bossCashIn').textContent=money(ins);document.getElementById('bossCashOut').textContent=money(outs);document.getElementById('bossCashBalance').textContent=money(ins-outs);document.getElementById('bossCashRows').innerHTML=state.bossCash.length?`<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th>Aksi</th></tr></thead><tbody>${state.bossCash.map(x=>`<tr><td>${esc(x.date)}</td><td>${x.type==='in'?'Pemasukan':'Pengeluaran'}</td><td>${esc(x.note)}</td><td>${x.type==='in'?'+':'−'}${money(x.amount)}</td><td><button class="btn danger" onclick="deleteBossCash(${x.id})">Hapus</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Belum ada transaksi kas bos.</p>'}
+function addMemberCash(){const date=document.getElementById('memberCashDate').value,member=document.getElementById('memberCashName').value,type=document.getElementById('memberCashType').value,amount=num(document.getElementById('memberCashAmount').value),note=document.getElementById('memberCashNote').value.trim();if(!date||!member||amount<=0||!note)return alert('Isi tanggal, anggota, keterangan, dan nominal dengan benar.');if(type==='out'&&amount>memberCashBalance(member))return alert('Penarikan melebihi saldo simpanan anggota.');state.memberCash.unshift({id:Date.now(),date,member,type,amount,note});document.getElementById('memberCashAmount').value='';document.getElementById('memberCashNote').value='';persist();alert('Transaksi kas anggota tersimpan.')}
+function memberCashBalance(member){return (state.memberCash||[]).filter(x=>x.member===member).reduce((s,x)=>s+(x.type==='in'?num(x.amount):-num(x.amount)),0)}
+function deleteMemberCash(id){if(confirm('Hapus transaksi kas anggota ini?')){state.memberCash=state.memberCash.filter(x=>x.id!==id);persist()}}
+function renderMemberCash(){state.memberCash ||= [];document.getElementById('memberCashName').innerHTML=state.members.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');const balances=state.members.map(m=>({member:m,balance:memberCashBalance(m)}));document.getElementById('memberCashSummary').innerHTML=`<div class="tablewrap"><table><thead><tr><th>Anggota</th><th>Saldo simpanan</th></tr></thead><tbody>${balances.map(x=>`<tr><td>${esc(x.member)}</td><td><strong>${money(x.balance)}</strong></td></tr>`).join('')}</tbody><tfoot><tr><th>Total seluruh simpanan</th><th>${money(balances.reduce((s,x)=>s+x.balance,0))}</th></tr></tfoot></table></div>`;document.getElementById('memberCashRows').innerHTML=state.memberCash.length?`<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Anggota</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th>Aksi</th></tr></thead><tbody>${state.memberCash.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.member)}</td><td>${x.type==='in'?'Simpanan':'Penarikan'}</td><td>${esc(x.note)}</td><td>${x.type==='in'?'+':'−'}${money(x.amount)}</td><td><button class="btn danger" onclick="deleteMemberCash(${x.id})">Hapus</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Belum ada transaksi kas anggota.</p>'}
+
+function renderPayslip(){
+ const dates=[...new Set(state.history.map(h=>h.date))].sort().reverse();
+ const ds=document.getElementById('slipDate'),ms=document.getElementById('slipMember');
+ if(!ds||!ms)return;
+ const oldDate=ds.value,oldMember=ms.value;
+ ds.innerHTML=dates.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
+ if(dates.includes(oldDate))ds.value=oldDate;
+ ms.innerHTML=state.members.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+ if(state.members.includes(oldMember))ms.value=oldMember;
+ const h=state.history.find(x=>x.date===ds.value&&x.workers.includes(ms.value));
+ const box=document.getElementById('payslipResult');
+ if(!h){box.innerHTML='<p class="notice">Tidak ada catatan gaji untuk anggota dan tanggal yang dipilih. Pastikan anggota tersebut tercatat bekerja pada tanggal itu.</p>';return}
+ const member=ms.value,main=num(h.per),spiral=h.spiralPeople.includes(member)?num(h.spiralPer):0,total=main+spiral;
+ const loan=memberLoanTotals(member);
+ box.innerHTML=`<div class="card" id="printPayslipArea"><div style="text-align:center"><h2>GRUP 57 (MATTUJU)</h2><h3>SLIP GAJI ANGGOTA</h3></div><p><b>Nama anggota:</b> ${esc(member)}<br><b>Tanggal produksi:</b> ${esc(h.date)}</p><div class="tablewrap"><table><tbody><tr><td>Gaji utama</td><td style="text-align:right">${money(main)}</td></tr><tr><td>Bonus spiral</td><td style="text-align:right">${money(spiral)}</td></tr><tr><th>Total gaji sebelum kasbon</th><th style="text-align:right">${money(total)}</th></tr><tr><td>Sisa kasbon saat ini (informasi)</td><td style="text-align:right">${money(loan.left)}</td></tr></tbody></table></div><p class="notice">Slip ini menunjukkan hak gaji dari catatan produksi yang dipilih. Sisa kasbon adalah informasi terpisah, bukan potongan otomatis. Disiapkan pada ${todayLocal()}.</p><div class="row" style="margin-top:35px"><div style="text-align:center">Penerima,<br><br><br>(${esc(member)})</div><div style="text-align:center">Bendahara,<br><br><br>(________________)</div></div></div>`;
+}
+function printPayslip(){if(!document.getElementById('printPayslipArea'))return alert('Pilih catatan gaji terlebih dahulu.');const area=document.getElementById('printPayslipArea').innerHTML;const w=window.open('','_blank');if(!w)return alert('Izinkan pop-up browser untuk mencetak slip gaji.');w.document.write('<!doctype html><html><head><title>Slip Gaji - GRUP 57 MATTUJU</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:Arial,sans-serif;padding:20px;color:#111}table{width:100%;border-collapse:collapse}td,th{border:1px solid #999;padding:10px;text-align:left}.notice{margin-top:16px;font-size:12px}</style></head><body>'+area+'</body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),400)}
+
+function renderDashboard(){let hs=state.history;document.getElementById('dGram').textContent=hs.reduce((s,h)=>s+h.grams,0).toLocaleString('id-ID')+' gram';document.getElementById('dNilai').textContent=money(hs.reduce((s,h)=>s+h.gross,0));document.getElementById('dBiaya').textContent=money(hs.reduce((s,h)=>s+h.expenseAll,0));document.getElementById('dHari').textContent=hs.length}
+function reportRows(){let mode=document.getElementById('reportMode')?.value||'month';let date=document.getElementById('reportDate')?.value||new Date().toISOString().slice(0,10);return {mode,date,rows:state.history.filter(h=>mode==='day'?h.date===date:String(h.date||'').slice(0,7)===date.slice(0,7)).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}}
+function renderReport(){let box=document.getElementById('reportResult');if(!box)return;let {mode,date,rows}=reportRows();let sum=(k)=>rows.reduce((a,h)=>a+(Number(h[k])||0),0);let grams=sum('grams'),gross=sum('gross'),cost=sum('expenseAll'),deduct=sum('expenseDeduct'),boss=sum('boss'),pool=sum('memberPool'),spiral=sum('spiralValue');box.innerHTML=`<div class="grid"><div class="metric"><span>Jumlah catatan</span><strong>${rows.length}</strong></div><div class="metric"><span>Produksi utama</span><strong>${grams.toLocaleString('id-ID')} gram</strong></div><div class="metric"><span>Nilai kotor</span><strong>${money(gross)}</strong></div><div class="metric"><span>Total biaya</span><strong>${money(cost)}</strong></div><div class="metric"><span>Biaya dipotong dari pembagian</span><strong>${money(deduct)}</strong></div><div class="metric"><span>Bagian bos</span><strong>${money(boss)}</strong></div><div class="metric"><span>Bagian anggota</span><strong>${money(pool)}</strong></div><div class="metric"><span>Nilai bonus spiral</span><strong>${money(spiral)}</strong></div></div><h3>Rincian catatan</h3>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Gram</th><th>Nilai kotor</th><th>Biaya</th><th>Bagian bos</th><th>Bagian anggota</th><th>Bonus spiral</th></tr></thead><tbody>${rows.map(h=>`<tr><td>${esc(h.date||'-')}</td><td>${Number(h.grams||0).toLocaleString('id-ID')}</td><td>${money(h.gross)}</td><td>${money(h.expenseAll)}</td><td>${money(h.boss)}</td><td>${money(h.memberPool)}</td><td>${money(h.spiralValue)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Belum ada catatan produksi untuk periode ini.</p>'}`}
+function exportReportCSV(){let {mode,date,rows}=reportRows();let header=['Tanggal','Produksi gram','Harga emas','Nilai kotor','Biaya total','Biaya dipotong','Bagian bos','Bagian anggota','Bonus spiral'];let lines=[header,...rows.map(h=>[h.date,h.grams,h.goldPrice,h.gross,h.expenseAll,h.expenseDeduct,h.boss,h.memberPool,h.spiralValue])];let csv='\ufeff'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Laporan-GRUP57-'+mode+'-'+date+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+function printReport(){let box=document.getElementById('reportResult');if(!box)return;let w=window.open('','_blank');if(!w)return alert('Izinkan pop-up untuk mencetak laporan.');w.document.write('<html><head><title>Laporan GRUP 57 MATTUJU</title><style>body{font:14px Arial;padding:20px;color:#111}table{width:100%;border-collapse:collapse}td,th{border:1px solid #aaa;padding:6px;text-align:left}.grid{display:flex;flex-wrap:wrap;gap:10px}.metric{border:1px solid #aaa;padding:10px;min-width:130px}h2,h3{margin-top:18px}</style></head><body><h1>GRUP 57 (MATTUJU)</h1><h2>Laporan Harian/Bulanan</h2>'+box.innerHTML+'</body></html>');w.document.close();w.focus();w.print()}
+function renderAll(){renderMembers();renderPrices();renderProductionInputs();renderLoans();renderHistory();renderDashboard();renderBossCash();renderMemberCash();renderPayslip();renderReport()}
+renderAll();
+document.getElementById('loanDate').value=todayLocal();document.getElementById('bossCashDate').value=todayLocal();document.getElementById('memberCashDate').value=todayLocal();
+
+// Status koneksi dan pemasangan PWA. Data transaksi tetap lokal di perangkat ini.
+function updateConnectionStatus(){
+ const el=document.getElementById('connectionStatus');
+ if(el)el.textContent=navigator.onLine?'Online • data tersimpan di perangkat':'Offline • aplikasi dapat dibuka, data tetap di perangkat';
+}
+window.addEventListener('online',updateConnectionStatus);
+window.addEventListener('offline',updateConnectionStatus);
+updateConnectionStatus();
+let installPromptEvent=null;
+window.addEventListener('beforeinstallprompt',event=>{
+ event.preventDefault();installPromptEvent=event;
+ const btn=document.getElementById('installAppBtn');if(btn)btn.hidden=false;
+});
+document.getElementById('installAppBtn')?.addEventListener('click',async()=>{
+ if(!installPromptEvent){alert('Jika tombol pemasangan tidak tersedia, buka menu browser lalu pilih “Tambahkan ke layar utama”.');return;}
+ installPromptEvent.prompt();
+ await installPromptEvent.userChoice;
+ installPromptEvent=null;
+ const btn=document.getElementById('installAppBtn');if(btn)btn.hidden=true;
+});
+window.addEventListener('appinstalled',()=>{
+ const btn=document.getElementById('installAppBtn');if(btn)btn.hidden=true;
+});
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(err=>console.warn('Service worker belum aktif:',err)));
+}
+</script>
+</body></html>
